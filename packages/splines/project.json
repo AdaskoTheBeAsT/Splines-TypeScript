@@ -1,0 +1,129 @@
+{
+  "$schema": "..\\..\\node_modules\\nx\\schemas\\project-schema.json",
+  "sourceRoot": "packages/splines/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/splines",
+        "main": "packages/splines/src/index.ts",
+        "tsConfig": "packages/splines/tsconfig.lib.json",
+        "assets": ["packages/splines/*.md"]
+      }
+    },
+    "publish": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "node tools/scripts/publish.mjs splines {args.ver} {args.tag}"
+      },
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "build"
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/splines/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/splines"],
+      "options": {
+        "jestConfig": "packages/splines/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "copy-license-readme": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "shx cp ./README.md ./packages/splines/src/README.md && shx cp ./LICENSE ./packages/splines/src/LICENSE"
+      }
+    },
+
+    "package": {
+      "executor": "@nrwl/web:rollup",
+      "outputs": ["{options.outputPath}"],
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "copy-license-readme"
+        }
+      ],
+      "options": {
+        "project": "packages/splines/package.json",
+        "outputPath": "dist/packages/splines",
+        "entryFile": "packages/splines/src/index.ts",
+        "tsConfig": "packages/splines/tsconfig.lib.json",
+        "compiler": "babel",
+        "umdName": "OtherName",
+        "external": ["typescript"],
+        "format": ["cjs", "esm", "umd"],
+        "assets": [
+          "packages/splines/src/README.md",
+          "packages/splines/src/LICENSE"
+        ]
+      }
+    },
+    "bundle": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "dependsOn": [
+        {
+          "target": "package",
+          "projects": "self"
+        }
+      ],
+      "options": {
+        "libraryName": "splines",
+        "libraryTargets": ["global", "commonjs", "amd", "umd"],
+        "index": "",
+        "tsConfig": "packages/splines/tsconfig.lib.json",
+        "main": "packages/splines/src/index.ts",
+        "outputPath": "dist/packages/splines/bundles",
+        "compiler": "babel",
+        "optimization": true,
+        "extractLicenses": true,
+        "runtimeChunk": false,
+        "vendorChunk": false,
+        "generateIndexHtml": false,
+        "commonChunk": false,
+        "namedChunks": false,
+        "webpackConfig": "webpack.config.js"
+      }
+    },
+    "move-to-folder": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "dependsOn": [
+        {
+          "target": "bundle",
+          "projects": "self"
+        }
+      ],
+      "options": {
+        "command": "cd dist/packages/splines"
+      }
+    },
+    "publish2": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "dependsOn": [
+        {
+          "target": "move-to-folder",
+          "projects": "self"
+        }
+      ],
+      "options": {
+        "command": "npm publish --tag=latest --access public"
+      }
+    }
+  },
+  "tags": []
+}
