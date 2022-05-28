@@ -69,7 +69,8 @@
           "packages/splines/src/README.md",
           "packages/splines/src/LICENSE"
         ]
-      }
+      },
+      "updateBuildableProjectDepsInPackageJson": true
     },
     "bundle": {
       "executor": "@nrwl/web:webpack",
