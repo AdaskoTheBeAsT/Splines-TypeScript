@@ -63,8 +63,8 @@
         "tsConfig": "packages/splines/tsconfig.lib.json",
         "compiler": "babel",
         "umdName": "OtherName",
-        "external": ["typescript"],
-        "format": ["cjs", "esm", "umd"],
+        "external": ["typescript", "core-js"],
+        "format": ["cjs", "esm"],
         "assets": [
           "packages/splines/src/README.md",
           "packages/splines/src/LICENSE"
