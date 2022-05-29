@@ -98,32 +98,6 @@
         "namedChunks": false,
         "webpackConfig": "webpack.config.js"
       }
-    },
-    "move-to-folder": {
-      "executor": "nx:run-commands",
-      "outputs": [],
-      "dependsOn": [
-        {
-          "target": "bundle",
-          "projects": "self"
-        }
-      ],
-      "options": {
-        "command": "cd dist/packages/splines"
-      }
-    },
-    "publish2": {
-      "executor": "nx:run-commands",
-      "outputs": [],
-      "dependsOn": [
-        {
-          "target": "move-to-folder",
-          "projects": "self"
-        }
-      ],
-      "options": {
-        "command": "npm publish --tag=latest --access public"
-      }
     }
   },
   "tags": []
