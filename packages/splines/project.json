@@ -46,7 +46,6 @@
         "command": "shx cp ./README.md ./packages/splines/src/README.md && shx cp ./LICENSE ./packages/splines/src/LICENSE"
       }
     },
-
     "package": {
       "executor": "@nrwl/web:rollup",
       "outputs": ["{options.outputPath}"],
