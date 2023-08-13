@@ -10,12 +10,12 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": ["es2017", "dom"],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@adaskothebeast/splines": ["packages/splines/src/index.ts"]
+      "@adaskothebeast/splines": ["libs/splines/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
