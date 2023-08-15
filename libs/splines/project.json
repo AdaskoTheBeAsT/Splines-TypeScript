@@ -1,7 +1,7 @@
 {
   "name": "splines",
   "$schema": "..\\..\\node_modules\\nx\\schemas\\project-schema.json",
-  "sourceRoot": "packages/splines/src",
+  "sourceRoot": "libs/splines/src",
   "projectType": "library",
   "targets": {
     "build": {
