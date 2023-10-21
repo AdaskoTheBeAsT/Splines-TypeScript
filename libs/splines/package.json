@@ -16,5 +16,8 @@
   },
   "bugs": {
     "url": "https://github.com/AdaskoTheBeAsT/Splines-TypeScript/issues"
+  },
+  "dependencies": {
+    "tslib": "^2.6.2"
   }
 }
