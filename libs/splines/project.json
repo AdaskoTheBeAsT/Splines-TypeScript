@@ -5,8 +5,7 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/rollup:rollup",
       "options": {
         "outputPath": "dist/libs/splines",
         "main": "libs/splines/src/index.ts",
@@ -15,8 +14,12 @@
           "libs/splines/src/MonotoneCubicHermitInterpolation.ts"
         ],
         "tsConfig": "libs/splines/tsconfig.lib.json",
-        "assets": ["libs/splines/*.md"]
-      }
+        "assets": [],
+        "format": ["esm", "cjs"],
+        "generateExportsField": true,
+        "compiler": "babel"
+      },
+      "":{}
     },
     "publish": {
       "command": "node tools/scripts/publish.mjs splines {args.ver} {args.tag}",
@@ -24,13 +27,7 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": [
-          "libs/splines/**/*.ts",
-          "libs/splines/package.json"
-        ]
-      }
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
