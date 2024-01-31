@@ -52,14 +52,14 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        yarn build:all
+        yarn build
 
   - task: Bash@3
     displayName: 'yarn test'
     inputs:
       targetType: 'inline'
       script: |
-        yarn test:all
+        yarn test
 
   # - task: Bash@3
   #   displayName: "yarn stylelint:ci"
@@ -76,7 +76,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        yarn lint:ci:all
+        yarn lint:ci
       failOnStderr: false
 
   - task: SonarCloudAnalyze@1
