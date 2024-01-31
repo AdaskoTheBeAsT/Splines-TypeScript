@@ -1,5 +1,5 @@
 /* eslint-disable */
-const reportPath = './.reports/packages/splines/';
+const reportPath = './.reports/libs/splines/';
 const reportName = 'test-report';
 
 export default {
