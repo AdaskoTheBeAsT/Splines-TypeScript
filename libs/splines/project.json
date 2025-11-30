@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/splines/src",
   "projectType": "library",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -19,7 +20,7 @@
         "generateExportsField": true,
         "compiler": "babel"
       },
-      "":{}
+      "": {}
     },
     "publish": {
       "command": "node tools/scripts/publish.mjs splines {args.ver} {args.tag}",
@@ -36,6 +37,5 @@
         "jestConfig": "libs/splines/jest.config.ts"
       }
     }
-  },
-  "tags": []
+  }
 }

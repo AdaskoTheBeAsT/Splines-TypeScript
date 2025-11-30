@@ -1,6 +1,6 @@
 {
   "name": "@adaskothebeast/splines",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "license": "AGPL-3.0-or-later",
   "description": "Spline interpolation for TypeScript",
   "author": "Adam Pluciński <adaskothebeast@gmail.com>",

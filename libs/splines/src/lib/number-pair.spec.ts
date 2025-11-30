@@ -1,17 +1,10 @@
-import { faker } from '@faker-js/faker';
-import {
-  NumberPair,
-  NumberTuple,
-  NumberValues,
-  isNumberPairArray,
-  isNumberTupleArray,
-} from './number-pair';
+import { NumberPair, NumberTuple, NumberValues, isNumberPairArray, isNumberTupleArray } from './number-pair';
 
 describe('Simple types', () => {
   describe('NumberPair', () => {
     it('should create proper number pair', () => {
-      const x = faker.number.float();
-      const y = faker.number.float();
+      const x = 1.5;
+      const y = 2.7;
 
       const pair = new NumberPair(x, y);
 
@@ -22,8 +15,8 @@ describe('Simple types', () => {
 
   describe('NumberTuple', () => {
     it('should create proper number tuple', () => {
-      const x = faker.number.float();
-      const y = faker.number.float();
+      const x = 3.14;
+      const y = 2.71;
 
       const pair: NumberTuple = [x, y];
 
@@ -34,15 +27,12 @@ describe('Simple types', () => {
 
   describe('NumberValues', () => {
     it('should create proper number values from NumberPairs', () => {
-      const x1 = faker.number.float();
-      const y1 = faker.number.float();
-      const x2 = faker.number.float();
-      const y2 = faker.number.float();
+      const x1 = 1;
+      const y1 = 2;
+      const x2 = 3;
+      const y2 = 4;
 
-      const values: NumberValues = [
-        new NumberPair(x1, y1),
-        new NumberPair(x2, y2),
-      ];
+      const values: NumberValues = [new NumberPair(x1, y1), new NumberPair(x2, y2)];
 
       expect(values[0].x).toBe(x1);
       expect(values[0].y).toBe(y1);
@@ -53,10 +43,10 @@ describe('Simple types', () => {
     });
 
     it('should create proper number values from NumberTuples', () => {
-      const x1 = faker.number.float();
-      const y1 = faker.number.float();
-      const x2 = faker.number.float();
-      const y2 = faker.number.float();
+      const x1 = 5;
+      const y1 = 6;
+      const x2 = 7;
+      const y2 = 8;
 
       const values: NumberValues = [
         [x1, y1],

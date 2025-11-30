@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from './lib/monotone-cubic-hermit-interpolation';
+export * from './lib/monotone-cubic-hermite-interpolation';
 export * from './lib/natural-spline';
 export * from './lib/number-pair';
 export * from './lib/sort-indexes';

@@ -45,14 +45,17 @@ export class NaturalSpline extends SplineBase implements Spline {
     const sup: number[] = [];
     sub[0] = 0.0;
     diag[0] = 0.0;
-    sub[0] = 0.0;
+    sup[0] = 0.0;
     for (let i = 1; i < length - 1; i++) {
       diag[i] = (this.h[i] + this.h[i + 1]) / 3.0;
       sup[i] = this.h[i + 1] / 6.0;
       sub[i] = this.h[i] / 6.0;
-      this.a[i] = (this.xs[i + 1] - this.xs[i]) / this.h[i + 1] - (this.xs[i] - this.xs[i - 1]) / this.h[i];
+
+      ///this.a[i] = (this.xs[i + 1] - this.xs[i]) / this.h[i + 1] - (this.xs[i] - this.xs[i - 1]) / this.h[i];
+      this.a[i] = (this.ys[i + 1] - this.ys[i]) / this.h[i + 1] - (this.ys[i] - this.ys[i - 1]) / this.h[i];
     }
     this.solve(sub, diag, sup, length - 2);
+    this.a[length - 1] = 0.0;
   }
 
   private solve(sub: number[], diag: number[], sup: number[], n: number) {
@@ -76,19 +79,33 @@ export class NaturalSpline extends SplineBase implements Spline {
       return this.ys[0];
     }
 
-    let gap = 0;
-    let previous = 0.0;
-    for (let i = 0; i < this.xs.length; i++) {
-      if (previous < this.xs[i] && this.xs[i] < x) {
-        previous = this.xs[i];
-        gap = i + 1;
-      }
-    }
-    const x1: number = x - previous;
-    const x2: number = this.h[gap] - x1;
-    if (gap === 0) {
+    // Handle x below or at the left boundary
+    if (x <= this.xs[0]) {
       return this.ys[0];
     }
+
+    // Handle x at or above the right boundary
+    if (x >= this.xs[this.xs.length - 1]) {
+      return this.ys[this.xs.length - 1];
+    }
+
+    // Find the segment containing x using binary search
+    let low = 0;
+    let high = this.xs.length - 1;
+    while (high - low > 1) {
+      const mid = Math.floor((low + high) / 2);
+      if (this.xs[mid] <= x) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+
+    // gap is the index of the right endpoint of the segment (1-based in original algorithm)
+    const gap = high;
+    const x1: number = x - this.xs[gap - 1];
+    const x2: number = this.h[gap] - x1;
+
     return (
       (((-this.a[gap - 1] / 6.0) * (x2 + this.h[gap]) * x1 + this.ys[gap - 1]) * x2 +
         ((-this.a[gap] / 6.0) * (x1 + this.h[gap]) * x2 + this.ys[gap]) * x1) /
