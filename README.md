@@ -38,7 +38,7 @@ const values: NumberPair[] = [new NumberPair(1, 5), new NumberPair(2, 6.5), ...]
 //or
 const values: NumberTuple[] = [[1, 5], [2, 6.5], ...];
 
-const spline = new MonotoneCubicHermitInterpolation(values);
+const spline = new MonotoneCubicHermiteInterpolation(values);
 
 const result = spline.interpolate(1.3);
 ```

@@ -12,7 +12,7 @@
         "main": "libs/splines/src/index.ts",
         "additionalEntryPoints": [
           "libs/splines/src/NaturalSpline.ts",
-          "libs/splines/src/MonotoneCubicHermitInterpolation.ts"
+          "libs/splines/src/MonotoneCubicHermiteInterpolation.ts"
         ],
         "tsConfig": "libs/splines/tsconfig.lib.json",
         "assets": [],

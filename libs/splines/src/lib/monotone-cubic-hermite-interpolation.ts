@@ -19,7 +19,7 @@ import { NumberValues } from './number-pair';
 import { Spline } from './spline';
 import { SplineBase } from './spline-base';
 
-export class MonotoneCubicHermitInterpolation extends SplineBase implements Spline {
+export class MonotoneCubicHermiteInterpolation extends SplineBase implements Spline {
   private c1s: number[];
   private c2s: number[];
   private c3s: number[];

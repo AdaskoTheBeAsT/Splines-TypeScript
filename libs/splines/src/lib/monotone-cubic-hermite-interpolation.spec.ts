@@ -1,4 +1,4 @@
-import { MonotoneCubicHermitInterpolation } from './monotone-cubic-hermite-interpolation';
+import { MonotoneCubicHermiteInterpolation } from './monotone-cubic-hermite-interpolation';
 import { NumberPair } from './number-pair';
 
 describe('MonotoneCubicHermiteInterpolation', () => {
@@ -6,7 +6,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
     it('should create interpolation from NumberPair array', () => {
       const values: NumberPair[] = [new NumberPair(0, 0), new NumberPair(1, 1), new NumberPair(2, 4)];
 
-      const spline = new MonotoneCubicHermitInterpolation(values);
+      const spline = new MonotoneCubicHermiteInterpolation(values);
 
       expect(spline).toBeDefined();
     });
@@ -18,7 +18,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
         [2, 4],
       ];
 
-      const spline = new MonotoneCubicHermitInterpolation(values);
+      const spline = new MonotoneCubicHermiteInterpolation(values);
 
       expect(spline).toBeDefined();
     });
@@ -26,7 +26,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
     it('should handle unsorted input by sorting by x values', () => {
       const values: NumberPair[] = [new NumberPair(2, 4), new NumberPair(0, 0), new NumberPair(1, 1)];
 
-      const spline = new MonotoneCubicHermitInterpolation(values);
+      const spline = new MonotoneCubicHermiteInterpolation(values);
 
       expect(spline.interpolate(0)).toBeCloseTo(0, 5);
       expect(spline.interpolate(2)).toBeCloseTo(4, 5);
@@ -39,12 +39,12 @@ describe('MonotoneCubicHermiteInterpolation', () => {
         const values: NumberPair[] = [];
 
         // Current implementation doesn't handle empty arrays gracefully
-        expect(() => new MonotoneCubicHermitInterpolation(values)).toThrow();
+        expect(() => new MonotoneCubicHermiteInterpolation(values)).toThrow();
       });
 
       it('should return the single y value for single point input', () => {
         const values: NumberPair[] = [new NumberPair(1, 5)];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(0)).toBe(5);
         expect(spline.interpolate(1)).toBe(5);
@@ -53,7 +53,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
 
       it('should handle two points (linear interpolation)', () => {
         const values: NumberPair[] = [new NumberPair(0, 0), new NumberPair(2, 4)];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(0)).toBeCloseTo(0, 5);
         expect(spline.interpolate(1)).toBeCloseTo(2, 5);
@@ -69,7 +69,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(2, 4),
           new NumberPair(3, 9),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(0)).toBeCloseTo(0, 5);
         expect(spline.interpolate(1)).toBeCloseTo(1, 5);
@@ -85,7 +85,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(2, 5),
           new NumberPair(3, 7),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(0.5)).toBeCloseTo(2, 5);
         expect(spline.interpolate(1.5)).toBeCloseTo(4, 5);
@@ -100,7 +100,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(3, 6),
           new NumberPair(4, 10),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         // Verify monotonicity - each subsequent value should be greater
         let prev = spline.interpolate(0);
@@ -119,7 +119,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(3, 1),
           new NumberPair(4, 0),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         // Verify monotonicity - each subsequent value should be smaller
         let prev = spline.interpolate(0);
@@ -139,7 +139,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(2, 0.9),
           new NumberPair(3, 1),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         // Check that interpolation doesn't overshoot
         for (let x = 0; x <= 3; x += 0.05) {
@@ -156,7 +156,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(2, 1),
           new NumberPair(3, 2),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         // Should pass through known points
         expect(spline.interpolate(1)).toBeCloseTo(1, 5);
@@ -173,7 +173,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(2, 1),
           new NumberPair(3, 3),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         // Should pass through known points
         expect(spline.interpolate(0)).toBeCloseTo(0, 5);
@@ -186,14 +186,14 @@ describe('MonotoneCubicHermiteInterpolation', () => {
     describe('boundary behavior', () => {
       it('should handle x value at left boundary', () => {
         const values: NumberPair[] = [new NumberPair(0, 0), new NumberPair(1, 1), new NumberPair(2, 4)];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(0)).toBeCloseTo(0, 5);
       });
 
       it('should handle x value at right boundary', () => {
         const values: NumberPair[] = [new NumberPair(0, 0), new NumberPair(1, 1), new NumberPair(2, 4)];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(2)).toBeCloseTo(4, 5);
       });
@@ -205,7 +205,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(2, 4),
           new NumberPair(3, 9),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         // Binary search should find exact matches
         expect(spline.interpolate(0)).toBe(0);
@@ -223,7 +223,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           [2, 4],
           [3, 9],
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(0)).toBeCloseTo(0, 5);
         expect(spline.interpolate(1)).toBeCloseTo(1, 5);
@@ -235,7 +235,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
     describe('extrapolation behavior', () => {
       it('should extrapolate beyond data range using cubic polynomial', () => {
         const values: NumberPair[] = [new NumberPair(0, 0), new NumberPair(1, 1), new NumberPair(2, 4)];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         // Extrapolation beyond right boundary
         const result = spline.interpolate(3);
@@ -256,7 +256,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(2, 4),
           new NumberPair(3, 9),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         console.log('\nMonotone Cubic Hermite - Parabola y=x² (7 points):');
         console.log('x       | actual  | spline  | error');
@@ -299,7 +299,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           new NumberPair(3.5, 12.25),
           new NumberPair(4, 16),
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         console.log('\nMonotone Cubic Hermite - Parabola y=x² (9 points, finer grid):');
         console.log('x       | actual  | spline  | error');
@@ -326,7 +326,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
           const x = (i * Math.PI * 2) / 12;
           values.push(new NumberPair(x, Math.sin(x)));
         }
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         console.log('\nMonotone Cubic Hermite - Sine wave (13 points):');
         console.log('x       | actual  | spline  | error');

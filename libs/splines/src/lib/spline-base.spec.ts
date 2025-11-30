@@ -1,4 +1,4 @@
-import { MonotoneCubicHermitInterpolation } from './monotone-cubic-hermite-interpolation';
+import { MonotoneCubicHermiteInterpolation } from './monotone-cubic-hermite-interpolation';
 import { NaturalSpline } from './natural-spline';
 import { NumberPair, NumberTuple } from './number-pair';
 
@@ -39,10 +39,10 @@ describe('SplineBase', () => {
       });
     });
 
-    describe('via MonotoneCubicHermitInterpolation', () => {
+    describe('via MonotoneCubicHermiteInterpolation', () => {
       it('should sort NumberPair input by x values', () => {
         const values: NumberPair[] = [new NumberPair(3, 9), new NumberPair(1, 1), new NumberPair(2, 4)];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(1)).toBeCloseTo(1, 5);
         expect(spline.interpolate(2)).toBeCloseTo(4, 5);
@@ -55,7 +55,7 @@ describe('SplineBase', () => {
           [1, 1],
           [2, 4],
         ];
-        const spline = new MonotoneCubicHermitInterpolation(values);
+        const spline = new MonotoneCubicHermiteInterpolation(values);
 
         expect(spline.interpolate(1)).toBeCloseTo(1, 5);
         expect(spline.interpolate(2)).toBeCloseTo(4, 5);
@@ -79,8 +79,8 @@ describe('SplineBase', () => {
         [3, 6],
       ];
 
-      const splineFromPairs = new MonotoneCubicHermitInterpolation(pairValues);
-      const splineFromTuples = new MonotoneCubicHermitInterpolation(tupleValues);
+      const splineFromPairs = new MonotoneCubicHermiteInterpolation(pairValues);
+      const splineFromTuples = new MonotoneCubicHermiteInterpolation(tupleValues);
 
       // Both should produce identical results
       for (let x = 0; x <= 3; x += 0.5) {
