@@ -1,6 +1,6 @@
 {
   "name": "@adaskothebeast/splines",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "license": "AGPL-3.0-or-later",
   "description": "Spline interpolation for TypeScript",
   "author": "Adam Pluciński <adaskothebeast@gmail.com>",
@@ -12,10 +12,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AdaskoTheBeAsT/Splines-TypeScript/Splines-TypeScript.git"
+    "url": "git+https://github.com/AdaskoTheBeAsT/Splines-TypeScript.git",
+    "directory": "libs/splines"
   },
   "bugs": {
     "url": "https://github.com/AdaskoTheBeAsT/Splines-TypeScript/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "sideEffects": false
 }

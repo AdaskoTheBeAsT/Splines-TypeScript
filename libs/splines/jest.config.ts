@@ -1,7 +1,7 @@
-const reportPath = './.reports/libs/splines/';
+const reportPath = '../../.reports/libs/splines/';
 const reportName = 'test-report';
 
-export default {
+module.exports = {
   displayName: 'splines',
   preset: '../../jest.preset.js',
   globals: {},
@@ -15,8 +15,8 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   collectCoverage: true,
-  coverageDirectory: `../../${reportPath}coverage`,
-  coverageReporters: ['cobertura', 'html', 'lcov'],
+  coverageDirectory: `${reportPath}coverage`,
+  coverageReporters: ['cobertura', 'html', ['lcov', { projectRoot: '../../' }]],
   reporters: [
     'default',
     [
@@ -58,7 +58,7 @@ export default {
         outputDirectory: reportPath,
         outputName: `${reportName}.sonar.xml`,
         reportedFilePath: 'relative',
-        relativeRootDir: './',
+        relativeRootDir: '../../',
       },
     ],
     [

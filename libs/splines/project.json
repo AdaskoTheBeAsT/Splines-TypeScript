@@ -5,36 +5,24 @@
   "projectType": "library",
   "tags": [],
   "targets": {
-    "build": {
-      "executor": "@nx/rollup:rollup",
-      "options": {
-        "outputPath": "dist/libs/splines",
-        "main": "libs/splines/src/index.ts",
-        "additionalEntryPoints": [
-          "libs/splines/src/NaturalSpline.ts",
-          "libs/splines/src/MonotoneCubicHermiteInterpolation.ts"
-        ],
-        "tsConfig": "libs/splines/tsconfig.lib.json",
-        "assets": [],
-        "format": ["esm", "cjs"],
-        "generateExportsField": true,
-        "compiler": "babel"
-      },
-      "": {}
-    },
     "publish": {
       "command": "node tools/scripts/publish.mjs splines {args.ver} {args.tag}",
       "dependsOn": ["build"]
     },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
-    },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}",
+        "{workspaceRoot}/.reports/libs/splines",
+        "{workspaceRoot}/.reports/libs/splines/coverage"
+      ],
       "options": {
-        "jestConfig": "libs/splines/jest.config.ts"
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "coverage": true
+        }
       }
     }
   }

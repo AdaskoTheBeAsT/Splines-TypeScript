@@ -18,98 +18,154 @@
 import { NumberValues } from './number-pair';
 import { Spline } from './spline';
 import { SplineBase } from './spline-base';
+import { OutOfRangeStrategy, SplineOptions } from './spline-options';
 
 export class NaturalSpline extends SplineBase implements Spline {
-  private a: number[];
-  private h: number[];
+  private readonly a: Float64Array;
+  private readonly h: Float64Array;
+  private readonly outOfRange: OutOfRangeStrategy;
 
-  constructor(values: NumberValues) {
+  constructor(values: NumberValues, options: SplineOptions = {}) {
     super(values);
 
-    this.a = [];
-    this.h = [];
-    this.a[0] = 0.0;
-    this.h[0] = 0.0;
-    const length: number = values.length;
+    this.outOfRange = options.outOfRange ?? 'clamp';
+
+    const xs = this.xs;
+    const ys = this.ys;
+    const length = xs.length;
+    this.a = new Float64Array(length);
+    this.h = new Float64Array(length);
 
     for (let i = 1; i < length; i++) {
-      this.h[i] = this.xs[i] - this.xs[i - 1];
+      this.h[i] = xs[i] - xs[i - 1];
     }
 
     if (length <= 2) {
       return;
     }
 
-    const sub: number[] = [];
-    const diag: number[] = [];
-    const sup: number[] = [];
-    sub[0] = 0.0;
-    diag[0] = 0.0;
-    sup[0] = 0.0;
-    for (let i = 1; i < length - 1; i++) {
-      diag[i] = (this.h[i] + this.h[i + 1]) / 3.0;
-      sup[i] = this.h[i + 1] / 6.0;
-      sub[i] = this.h[i] / 6.0;
+    const sub = new Float64Array(length);
+    const diag = new Float64Array(length);
+    const sup = new Float64Array(length);
 
-      ///this.a[i] = (this.xs[i + 1] - this.xs[i]) / this.h[i + 1] - (this.xs[i] - this.xs[i - 1]) / this.h[i];
-      this.a[i] = (this.ys[i + 1] - this.ys[i]) / this.h[i + 1] - (this.ys[i] - this.ys[i - 1]) / this.h[i];
+    for (let i = 1; i < length - 1; i++) {
+      const hCurr = this.h[i];
+      const hNext = this.h[i + 1];
+      diag[i] = (hCurr + hNext) / 3.0;
+      sup[i] = hNext / 6.0;
+      sub[i] = hCurr / 6.0;
+      this.a[i] = (ys[i + 1] - ys[i]) / hNext - (ys[i] - ys[i - 1]) / hCurr;
     }
+
     this.solve(sub, diag, sup, length - 2);
     this.a[length - 1] = 0.0;
   }
 
-  private solve(sub: number[], diag: number[], sup: number[], n: number) {
-    for (let i = 2; i < n; i++) {
+  private solve(sub: Float64Array, diag: Float64Array, sup: Float64Array, n: number): void {
+    const a = this.a;
+    for (let i = 2; i <= n; i++) {
       sub[i] = sub[i] / diag[i - 1];
       diag[i] = diag[i] - sub[i] * sup[i - 1];
-      this.a[i] = this.a[i] - sub[i] * this.a[i - 1];
+      a[i] = a[i] - sub[i] * a[i - 1];
     }
-    this.a[n] = this.a[n] / diag[n];
+    a[n] = a[n] / diag[n];
     for (let i = n - 1; i >= 1; i--) {
-      this.a[i] = (this.a[i] - sup[i] * this.a[i + 1]) / diag[i];
+      a[i] = (a[i] - sup[i] * a[i + 1]) / diag[i];
     }
   }
 
   public interpolate(x: number): number {
-    if (this.xs.length === 0) {
+    const xs = this.xs;
+    const ys = this.ys;
+    const length = xs.length;
+
+    if (length === 0) {
       return 0;
     }
 
-    if (this.xs.length === 1) {
-      return this.ys[0];
+    if (length === 1) {
+      return ys[0];
     }
 
-    // Handle x below or at the left boundary
-    if (x <= this.xs[0]) {
-      return this.ys[0];
+    if (length === 2) {
+      const x0 = xs[0];
+      const y0 = ys[0];
+      const x1 = xs[1];
+      const y1 = ys[1];
+
+      if (x <= x0) {
+        if (this.outOfRange === 'throw' && x < x0) {
+          throw new RangeError('x is out of range');
+        }
+        return this.outOfRange === 'extrapolate' ? y0 + (y1 - y0) * ((x - x0) / (x1 - x0)) : y0;
+      }
+      if (x >= x1) {
+        if (this.outOfRange === 'throw' && x > x1) {
+          throw new RangeError('x is out of range');
+        }
+        return this.outOfRange === 'extrapolate' ? y0 + (y1 - y0) * ((x - x0) / (x1 - x0)) : y1;
+      }
+
+      const t = (x - x0) / (x1 - x0);
+      return y0 + (y1 - y0) * t;
     }
 
-    // Handle x at or above the right boundary
-    if (x >= this.xs[this.xs.length - 1]) {
-      return this.ys[this.xs.length - 1];
+    const leftX = xs[0];
+    const rightX = xs[length - 1];
+    const leftY = ys[0];
+    const rightY = ys[length - 1];
+
+    if (x < leftX) {
+      if (this.outOfRange === 'throw') {
+        throw new RangeError('x is out of range');
+      }
+      if (this.outOfRange === 'clamp') {
+        return leftY;
+      }
+      return this.evaluateSegment(x, 1);
+    }
+
+    if (x > rightX) {
+      if (this.outOfRange === 'throw') {
+        throw new RangeError('x is out of range');
+      }
+      if (this.outOfRange === 'clamp') {
+        return rightY;
+      }
+      return this.evaluateSegment(x, length - 1);
+    }
+
+    if (x === leftX) {
+      return leftY;
+    }
+    if (x === rightX) {
+      return rightY;
     }
 
     // Find the segment containing x using binary search
     let low = 0;
-    let high = this.xs.length - 1;
+    let high = length - 1;
     while (high - low > 1) {
-      const mid = Math.floor((low + high) / 2);
-      if (this.xs[mid] <= x) {
+      const mid = (low + high) >>> 1;
+      if (xs[mid] <= x) {
         low = mid;
       } else {
         high = mid;
       }
     }
 
-    // gap is the index of the right endpoint of the segment (1-based in original algorithm)
-    const gap = high;
-    const x1: number = x - this.xs[gap - 1];
-    const x2: number = this.h[gap] - x1;
+    return this.evaluateSegment(x, high);
+  }
+
+  private evaluateSegment(x: number, gap: number): number {
+    const hGap = this.h[gap];
+    const x1 = x - this.xs[gap - 1];
+    const x2 = hGap - x1;
 
     return (
-      (((-this.a[gap - 1] / 6.0) * (x2 + this.h[gap]) * x1 + this.ys[gap - 1]) * x2 +
-        ((-this.a[gap] / 6.0) * (x1 + this.h[gap]) * x2 + this.ys[gap]) * x1) /
-      this.h[gap]
+      (((-this.a[gap - 1] / 6.0) * (x2 + hGap) * x1 + this.ys[gap - 1]) * x2 +
+        ((-this.a[gap] / 6.0) * (x1 + hGap) * x2 + this.ys[gap]) * x1) /
+      hGap
     );
   }
 }

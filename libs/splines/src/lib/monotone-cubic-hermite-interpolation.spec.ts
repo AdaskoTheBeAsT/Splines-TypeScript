@@ -35,11 +35,10 @@ describe('MonotoneCubicHermiteInterpolation', () => {
 
   describe('interpolate', () => {
     describe('edge cases', () => {
-      it('should throw for empty input (known limitation)', () => {
+      it('should throw for empty input', () => {
         const values: NumberPair[] = [];
 
-        // Current implementation doesn't handle empty arrays gracefully
-        expect(() => new MonotoneCubicHermiteInterpolation(values)).toThrow();
+        expect(() => new MonotoneCubicHermiteInterpolation(values)).toThrow(/at least 1 point/i);
       });
 
       it('should return the single y value for single point input', () => {
@@ -213,6 +212,23 @@ describe('MonotoneCubicHermiteInterpolation', () => {
         expect(spline.interpolate(2)).toBe(4);
         expect(spline.interpolate(3)).toBe(9);
       });
+
+      it('should support outOfRange options', () => {
+        // y = 2x + 1
+        const values: NumberPair[] = [new NumberPair(0, 1), new NumberPair(1, 3), new NumberPair(2, 5)];
+
+        const clampSpline = new MonotoneCubicHermiteInterpolation(values, { outOfRange: 'clamp' });
+        expect(clampSpline.interpolate(-1)).toBe(1);
+        expect(clampSpline.interpolate(3)).toBe(5);
+
+        const extrapolateSpline = new MonotoneCubicHermiteInterpolation(values, { outOfRange: 'extrapolate' });
+        expect(extrapolateSpline.interpolate(-1)).toBeCloseTo(-1, 10);
+        expect(extrapolateSpline.interpolate(3)).toBeCloseTo(7, 10);
+
+        const throwSpline = new MonotoneCubicHermiteInterpolation(values, { outOfRange: 'throw' });
+        expect(() => throwSpline.interpolate(-1)).toThrow(RangeError);
+        expect(() => throwSpline.interpolate(3)).toThrow(RangeError);
+      });
     });
 
     describe('with NumberTuple input', () => {
@@ -245,7 +261,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
     });
 
     describe('parabola interpolation (y = x²)', () => {
-      it('should show interpolation accuracy for 7 parabola points', () => {
+      it('should interpolate parabola sample points (7 points)', () => {
         // y = x² with 7 points from x = -3 to x = 3
         const values: NumberPair[] = [
           new NumberPair(-3, 9),
@@ -258,18 +274,14 @@ describe('MonotoneCubicHermiteInterpolation', () => {
         ];
         const spline = new MonotoneCubicHermiteInterpolation(values);
 
-        console.log('\nMonotone Cubic Hermite - Parabola y=x² (7 points):');
-        console.log('x       | actual  | spline  | error');
-        console.log('--------|---------|---------|--------');
-
         const testPoints = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5];
         for (const x of testPoints) {
           const actual = x * x;
           const interpolated = spline.interpolate(x);
           const error = Math.abs(actual - interpolated);
-          console.log(
-            `${x.toFixed(1).padStart(7)} | ${actual.toFixed(4).padStart(7)} | ${interpolated.toFixed(4).padStart(7)} | ${error.toFixed(4)}`,
-          );
+          expect(Number.isFinite(actual)).toBe(true);
+          expect(Number.isFinite(interpolated)).toBe(true);
+          expect(Number.isFinite(error)).toBe(true);
         }
 
         // Verify exact points
@@ -286,7 +298,7 @@ describe('MonotoneCubicHermiteInterpolation', () => {
         expect(spline.interpolate(1.5)).toBeCloseTo(2.25, 0);
       });
 
-      it('should work correctly with 9 points (finer granularity)', () => {
+      it('should keep low error with 9 points (finer granularity)', () => {
         // y = x² with 9 points from x = 0 to x = 4 (step 0.5)
         const values: NumberPair[] = [
           new NumberPair(0, 0),
@@ -301,25 +313,18 @@ describe('MonotoneCubicHermiteInterpolation', () => {
         ];
         const spline = new MonotoneCubicHermiteInterpolation(values);
 
-        console.log('\nMonotone Cubic Hermite - Parabola y=x² (9 points, finer grid):');
-        console.log('x       | actual  | spline  | error');
-        console.log('--------|---------|---------|--------');
-
         // Test at quarter points (between the data points)
         const testPoints = [0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.25, 3.75];
         for (const x of testPoints) {
           const actual = x * x;
           const interpolated = spline.interpolate(x);
           const error = Math.abs(actual - interpolated);
-          console.log(
-            `${x.toFixed(2).padStart(7)} | ${actual.toFixed(4).padStart(7)} | ${interpolated.toFixed(4).padStart(7)} | ${error.toFixed(4)}`,
-          );
           // With finer grid, error should be smaller
           expect(error).toBeLessThan(0.05);
         }
       });
 
-      it('should handle sine wave with 13 points', () => {
+      it('should interpolate sine wave with 13 points', () => {
         // sin(x) from 0 to 2π with 13 points
         const values: NumberPair[] = [];
         for (let i = 0; i <= 12; i++) {
@@ -328,19 +333,15 @@ describe('MonotoneCubicHermiteInterpolation', () => {
         }
         const spline = new MonotoneCubicHermiteInterpolation(values);
 
-        console.log('\nMonotone Cubic Hermite - Sine wave (13 points):');
-        console.log('x       | actual  | spline  | error');
-        console.log('--------|---------|---------|--------');
-
         // Test at intermediate points
         for (let i = 0; i < 12; i++) {
           const x = ((i + 0.5) * Math.PI * 2) / 12;
           const actual = Math.sin(x);
           const interpolated = spline.interpolate(x);
           const error = Math.abs(actual - interpolated);
-          console.log(
-            `${x.toFixed(3).padStart(7)} | ${actual.toFixed(4).padStart(7)} | ${interpolated.toFixed(4).padStart(7)} | ${error.toFixed(4)}`,
-          );
+          expect(Number.isFinite(actual)).toBe(true);
+          expect(Number.isFinite(interpolated)).toBe(true);
+          expect(Number.isFinite(error)).toBe(true);
         }
 
         // Check that it passes through data points

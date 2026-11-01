@@ -35,11 +35,10 @@ describe('NaturalSpline', () => {
 
   describe('interpolate', () => {
     describe('edge cases', () => {
-      it('should throw for empty input (known limitation)', () => {
+      it('should throw for empty input', () => {
         const values: NumberPair[] = [];
 
-        // Current implementation doesn't handle empty arrays gracefully
-        expect(() => new NaturalSpline(values)).toThrow();
+        expect(() => new NaturalSpline(values)).toThrow(/at least 1 point/i);
       });
 
       it('should return the single y value for single point input', () => {
@@ -55,18 +54,14 @@ describe('NaturalSpline', () => {
         const values: NumberPair[] = [new NumberPair(0, 0), new NumberPair(2, 4)];
         const spline = new NaturalSpline(values);
 
-        // With only 2 points, NaturalSpline uses simplified interpolation
-        expect(spline.interpolate(0)).toBeCloseTo(0, 5);
-        // Note: Right boundary has known issues in current implementation
-        // Testing midpoint instead
-        expect(typeof spline.interpolate(1)).toBe('number');
+        expect(spline.interpolate(0)).toBeCloseTo(0, 10);
+        expect(spline.interpolate(1)).toBeCloseTo(2, 10);
+        expect(spline.interpolate(2)).toBeCloseTo(4, 10);
       });
     });
 
     describe('interpolation accuracy', () => {
-      // Note: NaturalSpline has known issues with first segment
-      // Middle and later segments interpolate correctly
-      it('should interpolate correctly in later segments', () => {
+      it('should pass through all data points and interpolate accurately across all segments', () => {
         const values: NumberPair[] = [
           new NumberPair(0, 0),
           new NumberPair(1, 1),
@@ -75,10 +70,12 @@ describe('NaturalSpline', () => {
         ];
         const spline = new NaturalSpline(values);
 
-        // Later segments work - x=2 and x=3 data points
-        expect(spline.interpolate(2)).toBeCloseTo(4, 5);
-        expect(spline.interpolate(3)).toBeCloseTo(9, 5);
-        // Interpolated values in working segments
+        expect(spline.interpolate(0)).toBeCloseTo(0, 10);
+        expect(spline.interpolate(1)).toBeCloseTo(1, 10);
+        expect(spline.interpolate(2)).toBeCloseTo(4, 10);
+        expect(spline.interpolate(3)).toBeCloseTo(9, 10);
+        expect(spline.interpolate(0.5)).toBeCloseTo(0.25, 0);
+        expect(spline.interpolate(1.5)).toBeCloseTo(2.25, 0);
         expect(spline.interpolate(2.5)).toBeCloseTo(6.25, 0);
       });
 
@@ -91,8 +88,7 @@ describe('NaturalSpline', () => {
         ];
         const spline = new NaturalSpline(values);
 
-        // Test that middle segment produces finite values
-        for (let x = 1; x <= 2; x += 0.1) {
+        for (let x = 0; x <= 3; x += 0.1) {
           const y = spline.interpolate(x);
           expect(Number.isFinite(y)).toBe(true);
         }
@@ -106,6 +102,22 @@ describe('NaturalSpline', () => {
 
         // Should return first y value when x is less than minimum
         expect(spline.interpolate(0)).toBe(1);
+      });
+
+      it('should support outOfRange options', () => {
+        const values: NumberPair[] = [new NumberPair(0, 0), new NumberPair(1, 1), new NumberPair(2, 2)];
+
+        const clampSpline = new NaturalSpline(values, { outOfRange: 'clamp' });
+        expect(clampSpline.interpolate(-1)).toBe(0);
+        expect(clampSpline.interpolate(3)).toBe(2);
+
+        const extrapolateSpline = new NaturalSpline(values, { outOfRange: 'extrapolate' });
+        expect(extrapolateSpline.interpolate(-1)).toBeCloseTo(-1, 10);
+        expect(extrapolateSpline.interpolate(3)).toBeCloseTo(3, 10);
+
+        const throwSpline = new NaturalSpline(values, { outOfRange: 'throw' });
+        expect(() => throwSpline.interpolate(-1)).toThrow(RangeError);
+        expect(() => throwSpline.interpolate(3)).toThrow(RangeError);
       });
     });
 
@@ -126,7 +138,7 @@ describe('NaturalSpline', () => {
     });
 
     describe('parabola interpolation (y = x²)', () => {
-      it('should show interpolation accuracy for 7 parabola points (debug)', () => {
+      it('should produce finite values for parabola sample points (7 points)', () => {
         // y = x² with 7 points from x = -3 to x = 3
         const values: NumberPair[] = [
           new NumberPair(-3, 9),
@@ -139,25 +151,29 @@ describe('NaturalSpline', () => {
         ];
         const spline = new NaturalSpline(values);
 
-        console.log('\nParabola y=x² interpolation test (7 points):');
-        console.log('x       | actual  | spline  | error');
-        console.log('--------|---------|---------|--------');
-
         // Test interpolation at various points
         const testPoints = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5];
         for (const x of testPoints) {
           const actual = x * x;
           const interpolated = spline.interpolate(x);
           const error = Math.abs(actual - interpolated);
-          console.log(
-            `${x.toFixed(1).padStart(7)} | ${actual.toFixed(4).padStart(7)} | ${interpolated.toFixed(4).padStart(7)} | ${error.toFixed(4)}`,
-          );
+          expect(Number.isFinite(actual)).toBe(true);
+          expect(Number.isFinite(interpolated)).toBe(true);
+          expect(Number.isFinite(error)).toBe(true);
         }
 
-        // Only the segment just before the last data point seems to work
-        // This indicates bugs in both constructor (a[] calculation) and interpolate (gap finding)
+        // Verify exact knot points across all segments
+        expect(spline.interpolate(-3)).toBeCloseTo(9, 10);
+        expect(spline.interpolate(-2)).toBeCloseTo(4, 10);
+        expect(spline.interpolate(-1)).toBeCloseTo(1, 10);
+        expect(spline.interpolate(0)).toBeCloseTo(0, 10);
+        expect(spline.interpolate(1)).toBeCloseTo(1, 10);
+        expect(spline.interpolate(2)).toBeCloseTo(4, 10);
+        expect(spline.interpolate(3)).toBeCloseTo(9, 10);
+        expect(spline.interpolate(-1.5)).toBeCloseTo(2.25, 0);
+        expect(spline.interpolate(-0.5)).toBeCloseTo(0.25, 0);
+        expect(spline.interpolate(0.5)).toBeCloseTo(0.25, 0);
         expect(spline.interpolate(1.5)).toBeCloseTo(2.25, 0);
-        expect(spline.interpolate(2)).toBeCloseTo(4, 1);
       });
 
       it('should work correctly with only positive x values (simpler case)', () => {
@@ -171,17 +187,13 @@ describe('NaturalSpline', () => {
         ];
         const spline = new NaturalSpline(values);
 
-        console.log('\nParabola y=x² (positive x only, 5 points):');
-        console.log('x       | actual  | spline  | error');
-        console.log('--------|---------|---------|--------');
-
         for (let x = 0; x <= 4; x += 0.5) {
           const actual = x * x;
           const interpolated = spline.interpolate(x);
           const error = Math.abs(actual - interpolated);
-          console.log(
-            `${x.toFixed(1).padStart(7)} | ${actual.toFixed(4).padStart(7)} | ${interpolated.toFixed(4).padStart(7)} | ${error.toFixed(4)}`,
-          );
+          expect(Number.isFinite(actual)).toBe(true);
+          expect(Number.isFinite(interpolated)).toBe(true);
+          expect(Number.isFinite(error)).toBe(true);
         }
 
         // Middle segments should work better

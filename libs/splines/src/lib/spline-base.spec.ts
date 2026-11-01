@@ -1,6 +1,7 @@
 import { MonotoneCubicHermiteInterpolation } from './monotone-cubic-hermite-interpolation';
 import { NaturalSpline } from './natural-spline';
-import { NumberPair, NumberTuple } from './number-pair';
+import { NumberPair, NumberTuple, NumberValues } from './number-pair';
+import { SplineErrorCode, SplineInputError } from './input-validation';
 
 // Since SplineBase is abstract, we test it through its concrete implementations
 describe('SplineBase', () => {
@@ -86,6 +87,52 @@ describe('SplineBase', () => {
       for (let x = 0; x <= 3; x += 0.5) {
         expect(splineFromPairs.interpolate(x)).toBeCloseTo(splineFromTuples.interpolate(x), 10);
       }
+    });
+  });
+
+  describe('input validation', () => {
+    const constructors: Array<[string, (values: NumberValues) => unknown]> = [
+      ['NaturalSpline', (values) => new NaturalSpline(values)],
+      ['MonotoneCubicHermiteInterpolation', (values) => new MonotoneCubicHermiteInterpolation(values)],
+    ];
+
+    const expectInputError = (fn: () => unknown, code: SplineErrorCode) => {
+      try {
+        fn();
+        throw new Error('Expected constructor to throw');
+      } catch (e) {
+        expect(e).toBeInstanceOf(SplineInputError);
+        expect((e as SplineInputError).code).toBe(code);
+      }
+    };
+
+    it.each(constructors)('%s: should throw for empty input', (_, create) => {
+      expectInputError(() => create([]), SplineErrorCode.EmptyInput);
+    });
+
+    it.each(constructors)('%s: should throw for duplicate x values (NumberPair)', (_, create) => {
+      const values: NumberPair[] = [new NumberPair(0, 0), new NumberPair(0, 1), new NumberPair(1, 2)];
+      expectInputError(() => create(values), SplineErrorCode.NonIncreasingX);
+    });
+
+    it.each(constructors)('%s: should throw for duplicate x values (NumberTuple)', (_, create) => {
+      const values: NumberTuple[] = [
+        [0, 0],
+        [0, 1],
+        [1, 2],
+      ];
+      expectInputError(() => create(values), SplineErrorCode.NonIncreasingX);
+    });
+
+    it.each(constructors)('%s: should throw for non-finite numbers', (_, create) => {
+      expectInputError(() => create([new NumberPair(NaN, 0), new NumberPair(1, 1)]), SplineErrorCode.NonFinite);
+      expectInputError(() => create([new NumberPair(0, Infinity), new NumberPair(1, 1)]), SplineErrorCode.NonFinite);
+      expectInputError(() => create([new NumberPair(0, 0), new NumberPair(1, NaN)]), SplineErrorCode.NonFinite);
+    });
+
+    it.each(constructors)('%s: should throw for invalid input formats', (_, create) => {
+      const values = [{ foo: 1 }] as unknown as NumberValues;
+      expectInputError(() => create(values), SplineErrorCode.InvalidFormat);
     });
   });
 });

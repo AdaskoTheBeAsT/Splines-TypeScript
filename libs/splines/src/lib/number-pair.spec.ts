@@ -60,5 +60,12 @@ describe('Simple types', () => {
       expect(isNumberPairArray(values)).toBe(false);
       expect(isNumberTupleArray(values)).toBe(true);
     });
+
+    it('should return false for empty arrays (cannot infer runtime shape)', () => {
+      const values = [] as unknown as NumberValues;
+
+      expect(isNumberPairArray(values)).toBe(false);
+      expect(isNumberTupleArray(values)).toBe(false);
+    });
   });
 });

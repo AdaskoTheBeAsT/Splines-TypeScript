@@ -18,19 +18,27 @@
 import { NumberPair, NumberTuple } from './number-pair';
 
 export const sortNumberPairIndexes = (values: NumberPair[]): number[] => {
-  const indexes: number[] = [];
-  for (let i = 0; i < values.length; i++) {
-    indexes.push(i);
+  const count = values.length;
+  const indexes = new Array<number>(count);
+  for (let i = 0; i < count; i++) {
+    indexes[i] = i;
   }
-  indexes.sort((a: number, b: number) => (values[a].x < values[b].x ? -1 : 1));
+  indexes.sort((a: number, b: number) => {
+    const diff = values[a].x - values[b].x;
+    return diff !== 0 ? diff : a - b;
+  });
   return indexes;
 };
 
 export const sortNumberTupleIndexes = (values: NumberTuple[]): number[] => {
-  const indexes: number[] = [];
-  for (let i = 0; i < values.length; i++) {
-    indexes.push(i);
+  const count = values.length;
+  const indexes = new Array<number>(count);
+  for (let i = 0; i < count; i++) {
+    indexes[i] = i;
   }
-  indexes.sort((a: number, b: number) => (values[a][0] < values[b][0] ? -1 : 1));
+  indexes.sort((a: number, b: number) => {
+    const diff = values[a][0] - values[b][0];
+    return diff !== 0 ? diff : a - b;
+  });
   return indexes;
 };

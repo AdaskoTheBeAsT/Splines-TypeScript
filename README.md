@@ -1,8 +1,24 @@
 # 📈 Splines
 
 [![npm version](https://img.shields.io/npm/v/@adaskothebeast/splines.svg)](https://www.npmjs.com/package/@adaskothebeast/splines)
+![NPM Downloads @adaskothebeast/splines](https://img.shields.io/npm/dt/%40adaskothebeast%2Fsplines?label=splines)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0+-blue.svg)](https://www.typescriptlang.org/)
+[![CodeFactor](https://www.codefactor.io/repository/github/adaskothebeast/splines-typescript/badge)](https://www.codefactor.io/repository/github/adaskothebeast/splines-typescript)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AdaskoTheBeAsT/Splines-TypeScript/ci.yml)](https://github.com/AdaskoTheBeAsT/Splines-TypeScript/actions/workflows/ci.yml)
+![Sonar Tests](https://img.shields.io/sonar/tests/AdaskoTheBeAsT_Splines-TypeScript?server=https%3A%2F%2Fsonarcloud.io)
+![Sonar Coverage](https://img.shields.io/sonar/coverage/AdaskoTheBeAsT_Splines-TypeScript?server=https%3A%2F%2Fsonarcloud.io)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=alert_status)](https://sonarcloud.io/dashboard?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=bugs)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=AdaskoTheBeAsT_Splines-TypeScript&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=AdaskoTheBeAsT_Splines-TypeScript)
 
 **Lightweight, zero-dependency spline interpolation for TypeScript and JavaScript.**
 
@@ -117,6 +133,8 @@ const spline = new NaturalSpline([
 
 // Produces the smoothest possible curve (minimizes curvature)
 // May overshoot at peaks/valleys — that's often desirable for animation
+
+// Note: values outside the data range are clamped to the nearest endpoint
 ```
 
 **Why use it?**
@@ -152,10 +170,79 @@ const spline = new MonotoneCubicHermitInterpolation(data);
 const y = spline.interpolate(x);
 ```
 
+### Options
+
+Both algorithms accept an optional `options` argument:
+
+```ts
+type OutOfRangeStrategy = 'clamp' | 'extrapolate' | 'throw';
+
+type SplineOptions = {
+  outOfRange?: OutOfRangeStrategy;
+};
+```
+
+```ts
+import { NaturalSpline } from '@adaskothebeast/splines';
+
+const spline = new NaturalSpline(data, { outOfRange: 'extrapolate' });
+```
+
 **Notes:**
 - Data is automatically sorted by x-values
-- Extrapolation beyond data range uses the boundary polynomial
+- `MonotoneCubicHermiteInterpolation` defaults to `outOfRange: 'extrapolate'`
+- `NaturalSpline` defaults to `outOfRange: 'clamp'`
+- If `outOfRange: 'throw'`, `interpolate(x)` throws a `RangeError` for x outside the data range
+- `NaturalSpline` supports 2 points via linear interpolation (3+ points uses a natural cubic spline)
 - Empty arrays will throw an error
+- X values must be finite, and after sorting must be strictly increasing (duplicate x-values are not supported)
+
+### Input Validation & Errors
+
+Constructors validate input points up front and throw a `SplineInputError` with a `SplineErrorCode` when invalid data is provided:
+
+```ts
+import {
+  NaturalSpline,
+  SplineErrorCode,
+  SplineInputError,
+  validateInput,
+} from '@adaskothebeast/splines';
+
+try {
+  new NaturalSpline([
+    [1, 10],
+    [1, 20], // duplicate x
+  ]);
+} catch (err) {
+  if (err instanceof SplineInputError) {
+    console.error(err.code); // SplineErrorCode.NonIncreasingX ('NON_INCREASING_X')
+  }
+}
+```
+
+| Error Code (`SplineErrorCode`) | Value | Condition |
+|---|---|---|
+| `EmptyInput` | `'EMPTY_INPUT'` | Input array is empty |
+| `InvalidFormat` | `'INVALID_FORMAT'` | Input is not an array of `[number, number]` tuples or `{ x, y }` pairs |
+| `NonFinite` | `'NON_FINITE'` | Any `x` or `y` value is `NaN`, `Infinity`, or `-Infinity` |
+| `NonIncreasingX` | `'NON_INCREASING_X'` | Duplicate `x` values exist after sorting |
+
+---
+
+## 🆕 What's New in v6.0.0
+
+- **Configurable out-of-range behavior (`SplineOptions`)**: Pass `{ outOfRange: 'clamp' | 'extrapolate' | 'throw' }` to `NaturalSpline` (defaults to `'clamp'`) or `MonotoneCubicHermiteInterpolation` (defaults to `'extrapolate'`).
+- **Strict input validation (`SplineInputError` & `SplineErrorCode`)**: Constructors and the exported `validateInput` / `normalizeAndValidate` helpers validate that inputs are non-empty, finite, and have strictly increasing `x` values after sorting, throwing typed `SplineInputError` instances.
+- **`NaturalSpline` accuracy & 2-point support**:
+  - Fixed tridiagonal solver boundary handling so all spline segments pass accurately through every knot point.
+  - Added direct linear interpolation support when constructing `NaturalSpline` with 2 points.
+- **Performance optimizations**:
+  - Replaced internal number arrays with `Float64Array` buffers for spline coefficients.
+  - Added a fast path that skips index sorting when input points are already ordered by `x`.
+- **Subpath exports & modern toolchain**:
+  - Exported validation and options types/helpers from both `@adaskothebeast/splines` and subpath entrypoints (`@adaskothebeast/splines/NaturalSpline`, `@adaskothebeast/splines/MonotoneCubicHermiteInterpolation`).
+  - Upgraded build and test toolchain to Nx 24, TypeScript 6, and Node 26.
 
 ---
 

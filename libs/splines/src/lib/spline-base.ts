@@ -15,30 +15,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { NumberValues, isNumberPairArray, isNumberTupleArray } from './number-pair';
-import { sortNumberPairIndexes, sortNumberTupleIndexes } from './sort-indexes';
+import { NumberValues } from './number-pair';
+import { normalizeAndValidate } from './input-validation';
 
 export abstract class SplineBase {
   protected xs: number[];
   protected ys: number[];
 
   constructor(values: NumberValues) {
-    this.xs = [];
-    this.ys = [];
-
-    // Rearrange xs and ys so that xs is sorted
-    if (isNumberPairArray(values)) {
-      const indexes: number[] = sortNumberPairIndexes(values);
-      for (let i = 0; i < values.length; i++) {
-        this.xs.push(values[indexes[i]].x);
-        this.ys.push(values[indexes[i]].y);
-      }
-    } else if (isNumberTupleArray(values)) {
-      const indexes: number[] = sortNumberTupleIndexes(values);
-      for (let i = 0; i < values.length; i++) {
-        this.xs.push(values[indexes[i]][0]);
-        this.ys.push(values[indexes[i]][1]);
-      }
-    }
+    const normalized = normalizeAndValidate(values);
+    this.xs = normalized.xs;
+    this.ys = normalized.ys;
   }
 }

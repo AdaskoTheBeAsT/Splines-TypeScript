@@ -5,27 +5,6 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"],
       "cache": true
-    },
-    "@nx/jest:jest": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
-      "cache": true,
-      "options": {
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
-      }
-    },
-    "@nx/eslint:lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/.eslintrc.json",
-        "{workspaceRoot}/.eslintignore"
-      ],
-      "cache": true
     }
   },
   "namedInputs": {
@@ -42,5 +21,32 @@
     "sharedGlobals": []
   },
   "useInferencePlugins": false,
-  "defaultBase": "master"
+  "defaultBase": "main",
+  "analytics": false,
+  "neverConnectToCloud": true,
+  "plugins": [
+    {
+      "plugin": "@nx/rollup/plugin",
+      "options": {
+        "buildTargetName": "build"
+      }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      },
+      "include": ["libs/splines/**/*"]
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      },
+      "include": ["libs/splines/**/*"]
+    }
+  ],
+  "affected": {
+    "legacy": true
+  }
 }

@@ -24,9 +24,24 @@ export type NumberTuple = [number, number];
 export type NumberValues = NumberPair[] | NumberTuple[];
 
 export function isNumberPairArray(v: NumberValues): v is NumberPair[] {
-  return (v[0] as NumberPair)?.x !== undefined;
+  if (v.length === 0) {
+    return false;
+  }
+
+  const first = v[0] as unknown as { x?: unknown; y?: unknown };
+  return typeof first?.x === 'number' && typeof first?.y === 'number';
 }
 
 export function isNumberTupleArray(v: NumberValues): v is NumberTuple[] {
-  return (v[0] as [number, number])[0] !== undefined;
+  if (v.length === 0) {
+    return false;
+  }
+
+  const first = v[0] as unknown;
+  return (
+    Array.isArray(first) &&
+    (first as unknown[]).length >= 2 &&
+    typeof (first as unknown[])[0] === 'number' &&
+    typeof (first as unknown[])[1] === 'number'
+  );
 }

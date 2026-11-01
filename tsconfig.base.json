@@ -16,8 +16,19 @@
     "inlineSources": true,
     "baseUrl": ".",
     "paths": {
-      "@adaskothebeast/splines": ["libs/splines/src/index.ts"]
-    }
+      "@adaskothebeast/splines": ["libs/splines/src/index.ts"],
+      "@adaskothebeast/splines/NaturalSpline": [
+        "libs/splines/src/NaturalSpline.ts"
+      ],
+      "@adaskothebeast/splines/MonotoneCubicHermiteInterpolation": [
+        "libs/splines/src/MonotoneCubicHermiteInterpolation.ts"
+      ]
+    },
+    "strict": false,
+    "noUncheckedSideEffectImports": false,
+    "types": ["*"],
+    "esModuleInterop": false,
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["node_modules", "tmp"]
 }
